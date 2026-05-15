@@ -162,7 +162,7 @@ If you use this software in your research, please cite both:
 
 **The software:**
 
-> Sengupta, R., Padmini, U., et al. (2026). DyscalcBattery (Version 1.0.0) [Software]. Zenodo. [https://doi.org/10.5281/zenodo.XXXXXXX](https://doi.org/10.5281/zenodo.20195178)
+> Sengupta, R., Padmini, U., et al. (2026). DyscalcBattery (Version 1.0.0) [Software]. Zenodo. [https://doi.org/10.5281/zenodo.20195178](https://doi.org/10.5281/zenodo.20195178)
 
 **The software paper:**
 
