@@ -1,0 +1,36 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite both the software (this record) and the accompanying SoftwareX paper."
+title: "DyscalcBattery: An open browser-based psychophysical battery for dyscalculia screening and numerosity perception research"
+version: "1.0.0"
+date-released: "2026-XX-XX"
+license: MIT
+repository-code: "https://github.com/[PLACEHOLDER-username]/DyscalcBattery"
+url: "https://doi.org/10.5281/zenodo.XXXXXXX"
+authors:
+  - family-names: "Sengupta"
+    given-names: "Rakesh"
+    affiliation: "School of Interwoven Arts and Sciences, Krea University, India"
+    orcid: "https://orcid.org/[PLACEHOLDER]"
+    email: "rakesh.sengupta@krea.edu.in"
+  - family-names: "Padmini"
+    given-names: "Usha"
+    affiliation: "School of Interwoven Arts and Sciences, Krea University, India"
+keywords:
+  - dyscalculia
+  - numerosity perception
+  - Weber fraction
+  - psychophysics
+  - jsPsych
+  - open-source software
+  - cognitive screening
+preferred-citation:
+  type: article
+  title: "DyscalcBattery: An open browser-based psychophysical battery for dyscalculia screening and numerosity perception research"
+  authors:
+    - family-names: "Sengupta"
+      given-names: "Rakesh"
+    - family-names: "Padmini"
+      given-names: "Usha"
+  journal: "SoftwareX"
+  year: 2026
+  doi: "[PLACEHOLDER]"
