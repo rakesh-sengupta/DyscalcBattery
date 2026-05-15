@@ -6,7 +6,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![jsPsych](https://img.shields.io/badge/built%20with-jsPsych%207.3.4-blueviolet.svg)](https://www.jspsych.org/)
 
-> *Maintained by the [Computational Cognition Laboratory](https://krea.edu.in), School of Interwoven Arts and Sciences, Krea University, Sri City, Andhra Pradesh, India.*
+> *Maintained by the [Rakesh Sengupta]([https://krea.edu.in](https://krea.edu.in/sias/dr-rakesh-sengupta/)), School of Interwoven Arts and Sciences, Krea University, Sri City, Andhra Pradesh, India.*
 
 ---
 
