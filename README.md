@@ -2,7 +2,7 @@
 
 **An open browser-based psychophysical battery for dyscalculia screening and numerosity perception research.**
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX)
+[![DOI](https://zenodo.org/badge/1239378402.svg)](https://doi.org/10.5281/zenodo.20195178)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![jsPsych](https://img.shields.io/badge/built%20with-jsPsych%207.3.4-blueviolet.svg)](https://www.jspsych.org/)
 
@@ -206,7 +206,7 @@ Field deployment in Warangal, Telangana, is conducted with the cooperation of th
 **Email:** rakesh.sengupta@krea.edu.in
 **Institution:** School of Interwoven Arts and Sciences, Krea University, Sri City, Andhra Pradesh 517 646, India
 
-For bug reports and feature requests, please open an [issue](https://github.com/[PLACEHOLDER-username]/DyscalcBattery/issues).
+For bug reports and feature requests, please open an [issue](https://github.com/rakesh-sengupta/DyscalcBattery/issues).
 
 For research collaboration enquiries, please contact the maintainer directly.
 
