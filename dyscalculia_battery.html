@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dyscalculia Screening Battery — Sengupta Lab, Krea University</title>
+
+<!-- jsPsych v7 from CDN (no install needed) -->
+<script src="https://unpkg.com/jspsych@7.3.4"></script>
+<script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.3"></script>
+<script src="https://unpkg.com/@jspsych/plugin-html-button-response@1.2.0"></script>
+<script src="https://unpkg.com/@jspsych/plugin-canvas-keyboard-response@1.1.3"></script>
+<script src="https://unpkg.com/@jspsych/plugin-canvas-button-response@1.1.3"></script>
+<script src="https://unpkg.com/@jspsych/plugin-survey-html-form@1.0.3"></script>
+<script src="https://unpkg.com/@jspsych/plugin-instructions@1.1.4"></script>
+<script src="https://unpkg.com/@jspsych/plugin-fullscreen@1.2.0"></script>
+<link rel="stylesheet" href="https://unpkg.com/jspsych@7.3.4/css/jspsych.css">
+
+<style>
+  body { background:#f5f5f5; font-family: 'Open Sans', sans-serif; }
+  .jspsych-display-element { font-size: 22px; }
+  .jspsych-content { max-width: 1000px; }
+  .big-num { font-size: 220px; font-weight: bold; color: #000;
+             display: inline-block; padding: 0 80px; }
+  .instructions { text-align:left; max-width:800px; margin:0 auto;
+                  font-size:20px; line-height:1.5; }
+  .instructions h2 { color:#1F4E79; }
+  .response-prompt { font-size:24px; color:#333; margin-top:20px; }
+  .feedback-correct { color:#2E7D32; font-size:30px; font-weight:bold; }
+  .feedback-wrong   { color:#B71C1C; font-size:30px; font-weight:bold; }
+  .keypad { display:grid; grid-template-columns:repeat(5,80px); gap:10px;
+            justify-content:center; margin:20px auto; }
+  .keypad button { font-size:32px; padding:15px; cursor:pointer;
+                   background:#1F4E79; color:#fff; border:none; border-radius:8px; }
+  .keypad button:hover { background:#2E75B6; }
+  .menu-btn { font-size:20px; padding:15px 25px; margin:10px;
+              background:#1F4E79; color:#fff; border:none;
+              border-radius:8px; cursor:pointer; min-width:300px; }
+  .menu-btn:hover { background:#2E75B6; }
+  .menu-btn.done { background:#2E7D32; }
+  form.form { font-size:18px; }
+  form.form label { display:block; margin:10px 0; }
+  form.form input, form.form select { font-size:18px; padding:6px; margin-left:10px; }
+</style>
+</head>
+
+<body></body>
+
+<script>
+/* ════════════════════════════════════════════════════════════════════════════
+   DYSCALCULIA SCREENING BATTERY
+   ────────────────────────────────────────────────────────────────────────────
+   Sengupta Lab, SIAS, Krea University
+   For: PhD Field Study, Warangal, Telangana
+   Implements 7 tasks from the Usha Padmini Research Handbook:
+     PART A — SCREENING (Chapter 4)
+       1. Simple Reaction Time
+       2. Dot Enumeration (experimenter-administered)
+       3. Number Comparison
+     PART B — DEEP BATTERY (Chapter 5)
+       4. Number Numerosity Comparison (dots, child-administered)
+       5. Object Numerosity Comparison
+       6. Shape Numerosity Comparison
+       7. Colour Diversity Comparison
+   ──────────────────────────────────────────────────────────────────────────── */
+
+// ────────── INITIALISE jsPsych ──────────
+const jsPsych = initJsPsych({
+  on_finish: function() {
+    saveData();
+  },
+  show_progress_bar: true,
+  message_progress_bar: 'Progress'
+});
+
+// ────────── GLOBAL CONFIG ──────────
+const CONFIG = {
+  participant_id: '',
+  class_grade: '',
+  age: '',
+  sex: '',
+  order_group: 'A',
+  school_code: '',
+  date: new Date().toISOString().split('T')[0],
+  start_time: new Date().toISOString()
+};
+
+// ────────── HELPER FUNCTIONS ──────────
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function rand(min, max) {
+  return min + Math.random() * (max - min);
+}
+
+function saveData() {
+  const data = jsPsych.data.get();
+  // Add metadata to every row
+  data.values().forEach(row => {
+    row.participant_id = CONFIG.participant_id;
+    row.school_code    = CONFIG.school_code;
+    row.class_grade    = CONFIG.class_grade;
+    row.age            = CONFIG.age;
+    row.sex            = CONFIG.sex;
+    row.order_group    = CONFIG.order_group;
+    row.session_date   = CONFIG.date;
+  });
+  const csv = data.csv();
+  const blob = new Blob([csv], {type: 'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const fname = `WRG_${CONFIG.participant_id || 'XXX'}_${CONFIG.date}.csv`;
+  a.href = url;
+  a.download = fname;
+  a.click();
+  document.body.innerHTML =
+    `<div style="text-align:center; padding-top:80px; font-family:sans-serif;">
+       <h1 style="color:#1F4E79;">Session complete</h1>
+       <p style="font-size:22px;">Thank you. The data file has been downloaded:</p>
+       <p style="font-size:24px; color:#2E7D32;"><b>${fname}</b></p>
+       <p style="font-size:18px;">Please copy this file to your USB drive and Google Drive.</p>
+       <p style="font-size:18px;">You may now close this tab.</p>
+     </div>`;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   CANVAS DRAWING FUNCTIONS
+   ════════════════════════════════════════════════════════════════════════════ */
+
+const CANVAS_W = 900;
+const CANVAS_H = 450;
+
+function clearCanvas(ctx) {
+  ctx.fillStyle = '#bbb';
+  ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+}
+
+function drawFixation(ctx) {
+  ctx.fillStyle = '#000';
+  ctx.fillRect(CANVAS_W/2 - 8, CANVAS_H/2 - 2, 16, 4);
+  ctx.fillRect(CANVAS_W/2 - 2, CANVAS_H/2 - 8, 4, 16);
+}
+
+function drawVerticalDivider(ctx) {
+  ctx.strokeStyle = '#666';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(CANVAS_W/2, 30);
+  ctx.lineTo(CANVAS_W/2, CANVAS_H - 30);
+  ctx.stroke();
+}
+
+// Place N items in a rectangular region with no overlap.
+// Returns array of {x,y} positions.
+function placeItems(n, region, minDist, maxAttempts = 8000) {
+  const placed = [];
+  let attempts = 0;
+  while (placed.length < n && attempts < maxAttempts) {
+    const x = region.xMin + Math.random() * (region.xMax - region.xMin);
+    const y = region.yMin + Math.random() * (region.yMax - region.yMin);
+    let ok = true;
+    for (const p of placed) {
+      if (Math.hypot(x - p.x, y - p.y) < minDist) { ok = false; break; }
+    }
+    if (ok) placed.push({x, y});
+    attempts++;
+  }
+  return placed;
+}
+
+function drawDots(ctx, positions, radius, color='#000') {
+  ctx.fillStyle = color;
+  for (const p of positions) {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, radius, 0, 2 * Math.PI);
+    ctx.fill();
+  }
+}
+
+function drawNoiseMask(ctx) {
+  clearCanvas(ctx);
+  for (let i = 0; i < 4000; i++) {
+    const x = Math.random() * CANVAS_W;
+    const y = Math.random() * CANVAS_H;
+    const v = Math.floor(Math.random() * 255);
+    ctx.fillStyle = `rgb(${v},${v},${v})`;
+    ctx.fillRect(x, y, 3, 3);
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   TASK 1 — SIMPLE REACTION TIME
+   ════════════════════════════════════════════════════════════════════════════ */
+
+function buildSRT() {
+  const N_PRACTICE = 5;
+  const N_MAIN = 35;
+  const trials = [];
+
+  const instr = {
+    type: jsPsychInstructions,
+    pages: [
+      `<div class="instructions">
+        <h2>Task 1: Simple Reaction Time</h2>
+        <p>Look at the cross in the middle of the screen.</p>
+        <p>A black dot will appear after a short time.</p>
+        <p><b>Press the SPACE BAR as fast as you can when you see the dot.</b></p>
+        <p>Try not to press too early.</p>
+        <p>We will do 5 practice trials first, then 35 real trials.</p>
+        <p>Press SPACE BAR to begin.</p>
+       </div>`
+    ],
+    key_forward: ' ',
+    allow_backward: false
+  };
+
+  function makeSrtTrial(isPractice) {
+    const isi = rand(1500, 3500);
+    return [
+      // Fixation + wait
+      {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: '<div style="font-size:80px;">+</div>',
+        choices: 'NO_KEYS',
+        trial_duration: isi,
+        data: { task: 'srt', phase: isPractice ? 'practice' : 'main', segment: 'fixation' }
+      },
+      // Black dot — wait for keypress
+      {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: '<div style="font-size:120px; color:#000;">●</div>',
+        choices: [' '],
+        response_ends_trial: true,
+        trial_duration: 2000,
+        data: { task: 'srt', phase: isPractice ? 'practice' : 'main', segment: 'stim' }
+      }
+    ];
+  }
+
+  trials.push(instr);
+  for (let i = 0; i < N_PRACTICE; i++) trials.push(...makeSrtTrial(true));
+  trials.push({
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: `<div class="instructions"><h2>Practice complete</h2>
+               <p>Now the real trials begin. There are 35 of them.</p>
+               <p>Remember: press SPACE as fast as you can when you see the dot.</p>
+               <p>Press SPACE to start.</p></div>`,
+    choices: [' ']
+  });
+  for (let i = 0; i < N_MAIN; i++) trials.push(...makeSrtTrial(false));
+
+  trials.push({
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: `<div class="instructions"><h2>Task 1 complete!</h2>
+               <p>Well done. Press SPACE to continue.</p></div>`,
+    choices: [' ']
+  });
+
+  return trials;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   TASK 2 — DOT ENUMERATION (experimenter-administered)
+   The child says the number aloud; experimenter presses SPACE the instant the
+   child speaks, then types the number reported.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+function buildDotEnumeration() {
+  const trials = [];
+  // 6 trials per set size 1-10 = 60 main + 5 practice
+  const SET_SIZES = [1,2,3,4,5,6,7,8,9,10];
+  const REPS = 6;
+  const PRACTICE = [2, 5, 7, 3, 9];
+
+  const instr = {
+    type: jsPsychInstructions,
+    pages: [
+      `<div class="instructions">
+        <h2>Task 2: How Many Dots? (Experimenter-administered)</h2>
+        <p><b>Instructions for the experimenter:</b></p>
+        <ol>
+          <li>The child will see a screen of dots.</li>
+          <li>The moment the child <b>begins to say a number aloud</b>,
+              YOU (the experimenter) press <b>SPACE</b>.</li>
+          <li>Then a number-pad appears. Click the number the child said.</li>
+          <li>Move on to the next trial automatically.</li>
+        </ol>
+        <p><b>For the child (read aloud):</b><br>
+        "Some dots will appear on the screen.
+        Say out loud how many dots there are, as fast as you can. Be sure of your answer."</p>
+        <p>Press SPACE to begin 5 practice trials.</p>
+       </div>`
+    ],
+    key_forward: ' ',
+    allow_backward: false
+  };
+
+  function makeDotPositions(n) {
+    const region = { xMin: 250, xMax: 650, yMin: 80, yMax: 370 };
+    return placeItems(n, region, 28);
+  }
+
+  function makeDotTrial(setSize, isPractice) {
+    return [
+      // Fixation 500 ms
+      {
+        type: jsPsychCanvasKeyboardResponse,
+        canvas_size: [CANVAS_H, CANVAS_W],
+        stimulus: (c) => {
+          const ctx = c.getContext('2d');
+          clearCanvas(ctx);
+          drawFixation(ctx);
+        },
+        choices: 'NO_KEYS',
+        trial_duration: 500
+      },
+      // Show dots until SPACE (max 6 s)
+      {
+        type: jsPsychCanvasKeyboardResponse,
+        canvas_size: [CANVAS_H, CANVAS_W],
+        stimulus: (c) => {
+          const ctx = c.getContext('2d');
+          clearCanvas(ctx);
+          const positions = makeDotPositions(setSize);
+          drawDots(ctx, positions, 9);
+        },
+        choices: [' '],
+        response_ends_trial: true,
+        trial_duration: 6000,
+        data: {
+          task: 'dot_enumeration',
+          phase: isPractice ? 'practice' : 'main',
+          set_size: setSize
+        }
+      },
+      // Experimenter enters reported number via on-screen keypad
+      {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: `<div class="instructions">
+                    <p>What number did the child say? (Click below)</p>
+                   </div>`,
+        choices: ['1','2','3','4','5','6','7','8','9','10','0','Skip / unclear'],
+        button_html: '<button class="jspsych-btn" style="font-size:28px; min-width:60px;">%choice%</button>',
+        data: {
+          task: 'dot_enumeration_response',
+          phase: isPractice ? 'practice' : 'main',
+          set_size: setSize
+        },
+        on_finish: (data) => {
+          const choices = ['1','2','3','4','5','6','7','8','9','10','0','SKIP'];
+          data.reported_number = choices[data.response];
+          data.correct = (parseInt(data.reported_number) === setSize) ? 1 : 0;
+        }
+      }
+    ];
+  }
+
+  trials.push(instr);
+  // Practice
+  for (const s of PRACTICE) trials.push(...makeDotTrial(s, true));
+
+  trials.push({
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: `<div class="instructions"><h2>Practice done.</h2>
+               <p>The main trials begin now. There are 60 trials.</p>
+               <p>Remember: child says the number aloud, experimenter presses SPACE
+               the moment the child begins to speak, then taps the number.</p>
+               <p>Press SPACE to start.</p></div>`,
+    choices: [' ']
+  });
+
+  // Main: 6 reps × 10 set sizes, shuffled
+  const mainList = [];
+  for (const s of SET_SIZES) for (let r = 0; r < REPS; r++) mainList.push(s);
+  const shuffledMain = shuffle(mainList);
+  for (const s of shuffledMain) trials.push(...makeDotTrial(s, false));
+
+  trials.push({
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: `<div class="instructions"><h2>Task 2 complete!</h2>
+               <p>Press SPACE to continue.</p></div>`,
+    choices: [' ']
+  });
+  return trials;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   TASK 3 — NUMBER COMPARISON
+   Two Arabic digits 1-9 side by side. Press F if left is larger, J if right.
+   72 trials (all pairs i,j with i≠j and both orders) + 8 practice.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+function buildNumberComparison() {
+  const trials = [];
+
+  const instr = {
+    type: jsPsychInstructions,
+    pages: [
+      `<div class="instructions">
+        <h2>Task 3: Which Number is Bigger?</h2>
+        <p>You will see two numbers on the screen, one on the left and one on the right.</p>
+        <p><b>Press F if the LEFT number is bigger.</b></p>
+        <p><b>Press J if the RIGHT number is bigger.</b></p>
+        <p>Try to answer as fast as you can, but also try to be correct.</p>
+        <p>We will do 8 practice trials with feedback first.</p>
+        <p>Press SPACE to begin.</p>
+       </div>`
+    ],
+    key_forward: ' ',
+    allow_backward: false
+  };
+
+  function makePair(left, right, isPractice) {
+    return {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: `<div style="font-size:0;">
+                  <span class="big-num">${left}</span>
+                  <span class="big-num">${right}</span>
+                </div>`,
+      choices: ['f', 'j'],
+      trial_duration: 4000,
+      response_ends_trial: true,
+      data: {
+        task: 'number_comparison',
+        phase: isPractice ? 'practice' : 'main',
+        left_num: left,
+        right_num: right,
+        distance: Math.abs(left - right)
+      },
+      on_finish: (data) => {
+        const correct_key = (left > right) ? 'f' : 'j';
+        data.correct = (data.response === correct_key) ? 1 : 0;
+      }
+    };
+  }
+
+  function feedbackTrial() {
+    return {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: () => {
+        const last = jsPsych.data.getLastTrialData().values()[0];
+        return last.correct
+          ? '<div class="feedback-correct">Correct!</div>'
+          : '<div class="feedback-wrong">Try again next time.</div>';
+      },
+      choices: 'NO_KEYS',
+      trial_duration: 700
+    };
+  }
+
+  // Practice: 8 random pairs with feedback
+  const practicePairs = [[3,7],[8,2],[1,9],[6,5],[4,8],[7,3],[2,5],[9,1]];
+
+  // Main: all i,j with i!=j and i,j in 1..9, each order = 72 trials
+  const mainPairs = [];
+  for (let i = 1; i <= 9; i++) {
+    for (let j = 1; j <= 9; j++) {
+      if (i !== j) mainPairs.push([i, j]);
+    }
+  }
+
+  trials.push(instr);
+  for (const [l, r] of practicePairs) {
+    trials.push(makePair(l, r, true));
+    trials.push(feedbackTrial());
+    trials.push({
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: '<div style="font-size:80px;">+</div>',
+      choices: 'NO_KEYS',
+      trial_duration: 500
+    });
+  }
+  trials.push({
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: `<div class="instructions"><h2>Practice done.</h2>
+               <p>Now the real trials begin. There are 72 of them, with no feedback.</p>
+               <p>F = LEFT bigger, J = RIGHT bigger.</p>
+               <p>Press SPACE to start.</p></div>`,
+    choices: [' ']
+  });
+
+  for (const [l, r] of shuffle(mainPairs)) {
+    trials.push(makePair(l, r, false));
+    trials.push({
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: '<div style="font-size:80px;">+</div>',
+      choices: 'NO_KEYS',
+      trial_duration: 400
+    });
+  }
+
+  trials.push({
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: `<div class="instructions"><h2>Task 3 complete!</h2>
+               <p>This is the end of the SCREENING battery (Tasks 1–3).</p>
+               <p>Press SPACE to continue.</p></div>`,
+    choices: [' ']
+  });
+  return trials;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   TASK 4 — DOT NUMEROSITY COMPARISON
+   Brief presentation (600 ms) → mask → respond F (left more) or J (right more)
+   Reference always 16 dots; probe = round(16 * ratio).
+   Ratios: 1.2, 1.4, 1.6, 1.8, 2.0 — half trials probe>ref, half probe<ref.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+function buildDotNumerosityComparison() {
+  return buildNumerosityCompare('dots');
+}
+function buildObjectNumerosityComparison() {
+  return buildNumerosityCompare('objects');
+}
+function buildShapeNumerosityComparison() {
+  return buildNumerosityCompare('shapes');
+}
+function buildColourDiversityComparison() {
+  return buildColourTask();
+}
+
+function buildNumerosityCompare(kind) {
+  // kind: 'dots' | 'objects' | 'shapes'
+  const trials = [];
+  const REF_N = 16;
+  const RATIOS = [1.2, 1.4, 1.6, 1.8, 2.0];
+  const TRIALS_PER_RATIO = 10;   // 10 × 2 directions × 5 ratios = 100 main
+  // (10 trials probe>ref, 10 trials probe<ref, per ratio = 20 per ratio if 100 total / 5 = 20)
+  // We'll generate 20 trials per ratio: 10 with probe>ref and 10 with probe<ref
+  // so probe is either round(16*r) or round(16/r)
+  const taskLabel = {
+    dots:    'Dots',
+    objects: 'Objects',
+    shapes:  'Shapes'
+  }[kind];
+
+  const instr = {
+    type: jsPsychInstructions,
+    pages: [
+      `<div class="instructions">
+        <h2>${taskLabel} Task — Which side has MORE?</h2>
+        <p>You will see two groups of ${taskLabel.toLowerCase()} on the screen,
+           one on the left and one on the right.</p>
+        <p>They flash on the screen very briefly.</p>
+        <p><b>Press F if the LEFT side has MORE ${taskLabel.toLowerCase()}.</b></p>
+        <p><b>Press J if the RIGHT side has MORE ${taskLabel.toLowerCase()}.</b></p>
+        <p>You do not have time to count — just give your best impression.</p>
+        <p>We will do 8 practice trials first.</p>
+        <p>Press SPACE to begin.</p>
+       </div>`
+    ],
+    key_forward: ' ',
+    allow_backward: false
+  };
+
+  // Stimulus draw routines per kind
+  function drawStimulus(c, leftN, rightN) {
+    const ctx = c.getContext('2d');
+    clearCanvas(ctx);
+    drawVerticalDivider(ctx);
+
+    const leftRegion  = { xMin: 60, xMax: CANVAS_W/2 - 30, yMin: 40, yMax: CANVAS_H - 40 };
+    const rightRegion = { xMin: CANVAS_W/2 + 30, xMax: CANVAS_W - 60, yMin: 40, yMax: CANVAS_H - 40 };
+
+    if (kind === 'dots') {
+      const minDist = 26;
+      // Halberda-style: alternate which property is controlled
+      // (here we just keep dot size constant; future improvement)
+      const leftPositions  = placeItems(leftN, leftRegion, minDist);
+      const rightPositions = placeItems(rightN, rightRegion, minDist);
+      drawDots(ctx, leftPositions, 8);
+      drawDots(ctx, rightPositions, 8);
+    } else if (kind === 'objects') {
+      drawEmojiCloud(ctx, leftN, leftRegion);
+      drawEmojiCloud(ctx, rightN, rightRegion);
+    } else if (kind === 'shapes') {
+      drawShapeCloud(ctx, leftN, leftRegion);
+      drawShapeCloud(ctx, rightN, rightRegion);
+    }
+  }
+
+  function makeTrial(leftN, rightN, ratio, refSide, isPractice) {
+    return [
+      // Fixation 500 ms
+      {
+        type: jsPsychCanvasKeyboardResponse,
+        canvas_size: [CANVAS_H, CANVAS_W],
+        stimulus: (c) => { const ctx = c.getContext('2d'); clearCanvas(ctx); drawFixation(ctx); },
+        choices: 'NO_KEYS',
+        trial_duration: 500
+      },
+      // Stimulus 600 ms
+      {
+        type: jsPsychCanvasKeyboardResponse,
+        canvas_size: [CANVAS_H, CANVAS_W],
+        stimulus: (c) => drawStimulus(c, leftN, rightN),
+        choices: 'NO_KEYS',
+        trial_duration: 600
+      },
+      // Mask 200 ms
+      {
+        type: jsPsychCanvasKeyboardResponse,
+        canvas_size: [CANVAS_H, CANVAS_W],
+        stimulus: (c) => drawNoiseMask(c.getContext('2d')),
+        choices: 'NO_KEYS',
+        trial_duration: 200
+      },
+      // Response screen, up to 2500 ms
+      {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: `<div class="response-prompt">
+                     Which side had more ${taskLabel.toLowerCase()}?<br>
+                     <b>F = Left&nbsp;&nbsp;&nbsp;J = Right</b>
+                   </div>`,
+        choices: ['f','j'],
+        trial_duration: 2500,
+        response_ends_trial: true,
+        data: {
+          task: `${kind}_numerosity`,
+          phase: isPractice ? 'practice' : 'main',
+          left_n: leftN,
+          right_n: rightN,
+          ratio: ratio,
+          ref_side: refSide
+        },
+        on_finish: (data) => {
+          // Correct = key matches side with more items
+          const correct_key = (leftN > rightN) ? 'f' : 'j';
+          data.correct = (data.response === correct_key) ? 1 : 0;
+        }
+      },
+      // ITI 600 ms
+      {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: '',
+        choices: 'NO_KEYS',
+        trial_duration: 600
+      }
+    ];
+  }
+
+  // Build practice (use big ratios for easy)
+  const practiceTrials = [
+    {l:12, r:20, ratio:1.67}, {l:18, r:10, ratio:1.8}, {l:8, r:16, ratio:2.0},
+    {l:22, r:11, ratio:2.0}, {l:14, r:24, ratio:1.71}, {l:20, r:12, ratio:1.67},
+    {l:10, r:18, ratio:1.8}, {l:16, r:8, ratio:2.0}
+  ];
+
+  // Build main
+  const mainList = [];
+  for (const r of RATIOS) {
+    const probeHigh = Math.round(REF_N * r);
+    const probeLow  = Math.round(REF_N / r);
+    for (let i = 0; i < TRIALS_PER_RATIO; i++) {
+      // probe > ref, ref on left half / right half
+      const refSide = (i % 2 === 0) ? 'left' : 'right';
+      if (refSide === 'left') {
+        mainList.push({l:REF_N, r:probeHigh, ratio:r, refSide:'left'});
+        mainList.push({l:probeLow, r:REF_N,  ratio:r, refSide:'right'});
+      } else {
+        mainList.push({l:probeHigh, r:REF_N, ratio:r, refSide:'right'});
+        mainList.push({l:REF_N, r:probeLow,  ratio:r, refSide:'left'});
+      }
+    }
+  }
+  const mainShuffled = shuffle(mainList);
+
+  trials.push(instr);
+  for (const t of practiceTrials) {
+    trials.push(...makeTrial(t.l, t.r, t.ratio, t.l > t.r ? 'right_is_ref' : 'left_is_ref', true));
+  }
+  trials.push({
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: `<div class="instructions"><h2>Practice done.</h2>
+               <p>Main trials begin now. There will be ${mainShuffled.length} trials.</p>
+               <p>F = LEFT more, J = RIGHT more.</p>
+               <p>Take a short break here. Press SPACE when ready.</p></div>`,
+    choices: [' ']
+  });
+  for (const t of mainShuffled) {
+    trials.push(...makeTrial(t.l, t.r, t.ratio, t.refSide, false));
+  }
+  trials.push({
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: `<div class="instructions"><h2>${taskLabel} task complete!</h2>
+               <p>Take a 1-minute break. Press SPACE to continue when ready.</p></div>`,
+    choices: [' ']
+  });
+  return trials;
+}
+
+/* ────────── EMOJI / SHAPE drawing ────────── */
+const OBJECT_EMOJIS = ['🍎','🍌','🌟','🐱','🚗','☂️','⚽','📚','🌸','🐟','🍇','🎈','🔑','🐝','🌳'];
+
+function drawEmojiCloud(ctx, n, region) {
+  const positions = placeItems(n, region, 50);
+  ctx.font = '32px Arial';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  // pick n random emojis (with replacement allowed, but try variety)
+  const shuffled = shuffle(OBJECT_EMOJIS);
+  for (let i = 0; i < positions.length; i++) {
+    const e = shuffled[i % shuffled.length];
+    ctx.fillText(e, positions[i].x, positions[i].y);
+  }
+}
+
+function drawShapeCloud(ctx, n, region) {
+  const positions = placeItems(n, region, 36);
+  const shapes = ['circle','square','triangle','pentagon','hexagon'];
+  ctx.fillStyle = '#1F4E79';
+  ctx.strokeStyle = '#1F4E79';
+  ctx.lineWidth = 2;
+  for (let i = 0; i < positions.length; i++) {
+    const shape = shapes[Math.floor(Math.random() * shapes.length)];
+    drawShape(ctx, positions[i].x, positions[i].y, shape, 12);
+  }
+}
+
+function drawShape(ctx, cx, cy, kind, r) {
+  ctx.beginPath();
+  if (kind === 'circle') {
+    ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+  } else if (kind === 'square') {
+    ctx.rect(cx - r, cy - r, 2*r, 2*r);
+  } else if (kind === 'triangle') {
+    ctx.moveTo(cx, cy - r);
+    ctx.lineTo(cx + r * 0.866, cy + r * 0.5);
+    ctx.lineTo(cx - r * 0.866, cy + r * 0.5);
+    ctx.closePath();
+  } else if (kind === 'pentagon') {
+    polygonPath(ctx, cx, cy, r, 5, -Math.PI/2);
+  } else if (kind === 'hexagon') {
+    polygonPath(ctx, cx, cy, r, 6, 0);
+  }
+  ctx.fill();
+}
+
+function polygonPath(ctx, cx, cy, r, sides, rotation) {
+  for (let i = 0; i < sides; i++) {
+    const a = rotation + (i * 2 * Math.PI / sides);
+    const x = cx + r * Math.cos(a);
+    const y = cy + r * Math.sin(a);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   TASK 7 — COLOUR DIVERSITY COMPARISON
+   Each side has 12 colored patches. Sides differ in NUMBER OF DISTINCT COLOURS.
+   Child judges which side has more different colours.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+function buildColourTask() {
+  const trials = [];
+  const COLORS_POOL = ['#E53935','#1E88E5','#43A047','#FB8C00','#8E24AA',
+                       '#FDD835','#00ACC1','#6D4C41','#3949AB','#D81B60',
+                       '#7CB342','#F4511E'];
+  // We'll pair distinct-colour-counts: (3 vs 5), (3 vs 6), (4 vs 6), (4 vs 7), (5 vs 8)
+  const PAIRS = [
+    {a:3, b:5}, {a:3, b:6}, {a:4, b:6}, {a:4, b:7}, {a:5, b:8}
+  ];
+  const TRIALS_PER_PAIR = 20;
+
+  const instr = {
+    type: jsPsychInstructions,
+    pages: [
+      `<div class="instructions">
+        <h2>Colour Task — Which side has MORE COLOURS?</h2>
+        <p>You will see two groups of coloured circles, one on the left and one on the right.</p>
+        <p>Each side has 12 circles.</p>
+        <p>But the number of <b>different colours</b> is different on each side.</p>
+        <p><b>Press F if the LEFT side has MORE different colours.</b></p>
+        <p><b>Press J if the RIGHT side has MORE different colours.</b></p>
+        <p>The picture flashes briefly. Trust your impression.</p>
+        <p>We will do 6 practice trials.</p>
+        <p>Press SPACE to begin.</p>
+       </div>`
+    ],
+    key_forward: ' ',
+    allow_backward: false
+  };
+
+  function drawCircles(ctx, n_total, n_colors, region) {
+    // n_total positions, with the first n_colors using distinct hues
+    // remaining positions repeat colors from the chosen palette
+    const positions = placeItems(n_total, region, 38);
+    const palette = shuffle(COLORS_POOL).slice(0, n_colors);
+    for (let i = 0; i < positions.length; i++) {
+      const c = palette[i % palette.length];
+      ctx.fillStyle = c;
+      ctx.beginPath();
+      ctx.arc(positions[i].x, positions[i].y, 16, 0, 2*Math.PI);
+      ctx.fill();
+    }
+  }
+
+  function drawColorStim(c, leftCols, rightCols) {
+    const ctx = c.getContext('2d');
+    clearCanvas(ctx);
+    drawVerticalDivider(ctx);
+    const leftRegion  = { xMin: 60, xMax: CANVAS_W/2 - 30, yMin: 40, yMax: CANVAS_H - 40 };
+    const rightRegion = { xMin: CANVAS_W/2 + 30, xMax: CANVAS_W - 60, yMin: 40, yMax: CANVAS_H - 40 };
+    drawCircles(ctx, 12, leftCols, leftRegion);
+    drawCircles(ctx, 12, rightCols, rightRegion);
+  }
+
+  function makeColorTrial(leftCols, rightCols, isPractice) {
+    return [
+      {
+        type: jsPsychCanvasKeyboardResponse,
+        canvas_size: [CANVAS_H, CANVAS_W],
+        stimulus: (c) => { const ctx = c.getContext('2d'); clearCanvas(ctx); drawFixation(ctx); },
+        choices: 'NO_KEYS',
+        trial_duration: 500
+      },
+      {
+        type: jsPsychCanvasKeyboardResponse,
+        canvas_size: [CANVAS_H, CANVAS_W],
+        stimulus: (c) => drawColorStim(c, leftCols, rightCols),
+        choices: 'NO_KEYS',
+        trial_duration: 800
+      },
+      {
+        type: jsPsychCanvasKeyboardResponse,
+        canvas_size: [CANVAS_H, CANVAS_W],
+        stimulus: (c) => drawNoiseMask(c.getContext('2d')),
+        choices: 'NO_KEYS',
+        trial_duration: 200
+      },
+      {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: `<div class="response-prompt">
+                     Which side had MORE different colours?<br>
+                     <b>F = Left&nbsp;&nbsp;&nbsp;J = Right</b>
+                   </div>`,
+        choices: ['f','j'],
+        trial_duration: 3000,
+        response_ends_trial: true,
+        data: {
+          task: 'colour_diversity',
+          phase: isPractice ? 'practice' : 'main',
+          left_colors: leftCols,
+          right_colors: rightCols
+        },
+        on_finish: (data) => {
+          const correct_key = (leftCols > rightCols) ? 'f' : 'j';
+          data.correct = (data.response === correct_key) ? 1 : 0;
+        }
+      },
+      {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: '',
+        choices: 'NO_KEYS',
+        trial_duration: 600
+      }
+    ];
+  }
+
+  // Practice: easy contrasts
+  const practice = [
+    {l:3, r:8}, {l:7, r:3}, {l:4, r:8}, {l:8, r:4}, {l:3, r:7}, {l:6, r:3}
+  ];
+
+  // Main: each pair, 20 trials, half left>right and half left<right
+  const main = [];
+  for (const p of PAIRS) {
+    for (let i = 0; i < TRIALS_PER_PAIR / 2; i++) {
+      main.push({l: p.b, r: p.a});  // left more
+      main.push({l: p.a, r: p.b});  // right more
+    }
+  }
+  const mainShuffled = shuffle(main);
+
+  trials.push(instr);
+  for (const t of practice) trials.push(...makeColorTrial(t.l, t.r, true));
+  trials.push({
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: `<div class="instructions"><h2>Practice done.</h2>
+               <p>Main trials begin. ${mainShuffled.length} trials, no feedback.</p>
+               <p>F = LEFT more colours, J = RIGHT more colours.</p>
+               <p>Press SPACE to start.</p></div>`,
+    choices: [' ']
+  });
+  for (const t of mainShuffled) trials.push(...makeColorTrial(t.l, t.r, false));
+  trials.push({
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: `<div class="instructions"><h2>Colour task complete!</h2>
+               <p>Press SPACE to continue.</p></div>`,
+    choices: [' ']
+  });
+  return trials;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   PARTICIPANT INFO FORM
+   ════════════════════════════════════════════════════════════════════════════ */
+
+function buildInfoForm() {
+  return [{
+    type: jsPsychSurveyHtmlForm,
+    preamble: `<div class="instructions">
+                <h1 style="color:#1F4E79;">Dyscalculia Screening Battery</h1>
+                <p>Sengupta Lab, Krea University · Warangal Field Study</p>
+                <p><b>For the experimenter:</b> please fill in the child's details below.
+                   This information will be saved with the data file.</p>
+              </div>`,
+    html: `
+      <div class="form-content">
+        <p><label>Participant ID (format WRG_###):
+          <input name="participant_id" type="text" required size="10" placeholder="WRG_001">
+        </label></p>
+        <p><label>School code:
+          <input name="school_code" type="text" required size="20" placeholder="GHS_HNK_01">
+        </label></p>
+        <p><label>Class:
+          <select name="class_grade" required>
+            <option value="">--</option>
+            <option value="3">3</option><option value="4">4</option>
+            <option value="5">5</option><option value="6">6</option>
+            <option value="7">7</option><option value="8">8</option>
+          </select>
+        </label></p>
+        <p><label>Age (years):
+          <input name="age" type="number" min="6" max="16" required size="5">
+        </label></p>
+        <p><label>Sex:
+          <select name="sex" required>
+            <option value="">--</option>
+            <option value="F">Female</option>
+            <option value="M">Male</option>
+            <option value="Other">Other</option>
+          </select>
+        </label></p>
+        <p><label>Order group (counterbalance A/B/C/D):
+          <select name="order_group">
+            <option value="A">A: Dots &rarr; Objects &rarr; Shapes &rarr; Colours</option>
+            <option value="B">B: Shapes &rarr; Colours &rarr; Dots &rarr; Objects</option>
+            <option value="C">C: Colours &rarr; Dots &rarr; Shapes &rarr; Objects</option>
+            <option value="D">D: Objects &rarr; Shapes &rarr; Colours &rarr; Dots</option>
+          </select>
+        </label></p>
+      </div>`,
+    button_label: 'Continue',
+    on_finish: (data) => {
+      const r = data.response || {};
+      CONFIG.participant_id = r.participant_id || '';
+      CONFIG.school_code    = r.school_code || '';
+      CONFIG.class_grade    = r.class_grade || '';
+      CONFIG.age            = r.age || '';
+      CONFIG.sex            = r.sex || '';
+      CONFIG.order_group    = r.order_group || 'A';
+    }
+  }];
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   TASK SELECTOR MENU
+   ════════════════════════════════════════════════════════════════════════════ */
+
+function buildTaskMenu() {
+  return [{
+    type: jsPsychHtmlButtonResponse,
+    stimulus: `<div class="instructions">
+                <h2>Choose what to run this session</h2>
+                <p style="font-size:18px;">
+                  <b>Recommended:</b><br>
+                  – First visit: SCREENING (Tasks 1–3, ~20 min)<br>
+                  – Second visit: DEEP BATTERY (Tasks 4–7, ~25 min)<br>
+                  – Or run individual tasks for practice / make-up.
+                </p>
+              </div>`,
+    choices: [
+      'Full SCREENING (Tasks 1–3)',
+      'Full DEEP BATTERY (Tasks 4–7)',
+      'Everything (Tasks 1–7)',
+      'Task 1 only: Simple RT',
+      'Task 2 only: Dot Enumeration',
+      'Task 3 only: Number Comparison',
+      'Task 4 only: Dot Numerosity',
+      'Task 5 only: Object Numerosity',
+      'Task 6 only: Shape Numerosity',
+      'Task 7 only: Colour Diversity'
+    ],
+    button_html:
+      '<button class="menu-btn">%choice%</button>',
+    data: { event: 'menu_select' },
+    on_finish: (data) => {
+      data.menu_choice_index = data.response;
+      userChoice.idx = data.response;
+    }
+  }];
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   BUILD TIMELINE — conditional_function on each task node decides whether
+   to run that task based on the user's menu choice.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+const tasksByIndex = {
+  0: ['srt','dotenum','numcomp'],                                   // full screening
+  1: ['dotnum','objnum','shapenum','colour'],                       // deep battery
+  2: ['srt','dotenum','numcomp','dotnum','objnum','shapenum','colour'], // all
+  3: ['srt'],
+  4: ['dotenum'],
+  5: ['numcomp'],
+  6: ['dotnum'],
+  7: ['objnum'],
+  8: ['shapenum'],
+  9: ['colour']
+};
+
+const userChoice = { idx: 2 };  // default: run everything
+
+function shouldRunTask(taskKey) {
+  return function() {
+    const keys = tasksByIndex[userChoice.idx] || tasksByIndex[2];
+    return keys.includes(taskKey);
+  };
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   ASSEMBLE FINAL TIMELINE
+   ════════════════════════════════════════════════════════════════════════════ */
+
+const welcome = {
+  type: jsPsychHtmlKeyboardResponse,
+  stimulus: `<div class="instructions">
+              <h1 style="color:#1F4E79;">Welcome.</h1>
+              <p>This is the digital part of the dyscalculia battery used by
+                 Smt. Usha Padmini's PhD study in Warangal.</p>
+              <p>The session will take 20–45 minutes depending on which tasks you choose.</p>
+              <p>If the child becomes tired, take a break. You can pause between tasks.</p>
+              <p>If anything goes wrong, just close the browser and re-open this file.
+                 No data is lost mid-task — but the session must be restarted.</p>
+              <p><b>Press SPACE to begin.</b></p>
+             </div>`,
+  choices: [' ']
+};
+
+const fullscreenStart = {
+  type: jsPsychFullscreen,
+  fullscreen_mode: true,
+  message: '<div class="instructions"><p>Click below to enter full-screen mode.</p></div>'
+};
+
+const fullscreenEnd = {
+  type: jsPsychFullscreen,
+  fullscreen_mode: false
+};
+
+const finalMessage = {
+  type: jsPsychHtmlKeyboardResponse,
+  stimulus: `<div class="instructions">
+              <h2 style="color:#2E7D32;">All done. Thank you!</h2>
+              <p>The data file will download automatically when you press SPACE.</p>
+              <p>Please save it to your USB drive and Google Drive immediately.</p>
+              <p>Press SPACE.</p>
+             </div>`,
+  choices: [' ']
+};
+
+/* ─── Pre-build all task timelines once ─── */
+
+const allTaskNodes = [
+  { key: 'srt',      timeline: buildSRT() },
+  { key: 'dotenum',  timeline: buildDotEnumeration() },
+  { key: 'numcomp',  timeline: buildNumberComparison() },
+  { key: 'dotnum',   timeline: buildDotNumerosityComparison() },
+  { key: 'objnum',   timeline: buildObjectNumerosityComparison() },
+  { key: 'shapenum', timeline: buildShapeNumerosityComparison() },
+  { key: 'colour',   timeline: buildColourDiversityComparison() }
+];
+
+/* Each task is wrapped in a conditional node. The conditional_function checks,
+   at runtime, whether this task should be included based on the menu choice. */
+const conditionalTaskNodes = allTaskNodes.map(t => ({
+  timeline: t.timeline,
+  conditional_function: shouldRunTask(t.key)
+}));
+
+/* ────────── RUN ────────── */
+const masterTimeline = [
+  fullscreenStart,
+  welcome,
+  ...buildInfoForm(),
+  ...buildTaskMenu(),
+  ...conditionalTaskNodes,
+  fullscreenEnd,
+  finalMessage
+];
+
+jsPsych.run(masterTimeline);
+</script>
+</html>
