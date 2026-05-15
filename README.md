@@ -196,8 +196,6 @@ Built on [jsPsych](https://www.jspsych.org/) by Josh de Leeuw and contributors.
 
 Object icons (Task 5) are Unicode emoji rendered by the user's system font; no external asset files are required.
 
-Field deployment in Warangal, Telangana, is conducted with the cooperation of the District Educational Officer and participating government school headmasters. We thank the children and families who have made this research possible.
-
 ---
 
 ## Contact
