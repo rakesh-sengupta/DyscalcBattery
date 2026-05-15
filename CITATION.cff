@@ -4,17 +4,17 @@ title: "DyscalcBattery: An open browser-based psychophysical battery for dyscalc
 version: "1.0.0"
 date-released: "2026-XX-XX"
 license: MIT
-repository-code: "https://github.com/[PLACEHOLDER-username]/DyscalcBattery"
+repository-code: "https://github.com/rakesh-sengupta/DyscalcBattery"
 url: "https://doi.org/10.5281/zenodo.XXXXXXX"
 authors:
   - family-names: "Sengupta"
     given-names: "Rakesh"
     affiliation: "School of Interwoven Arts and Sciences, Krea University, India"
-    orcid: "https://orcid.org/[PLACEHOLDER]"
+    orcid: "https://orcid.org/0000-0003-1768-0551"
     email: "rakesh.sengupta@krea.edu.in"
   - family-names: "Padmini"
     given-names: "Usha"
-    affiliation: "School of Interwoven Arts and Sciences, Krea University, India"
+    affiliation: "Center for Creative Cognition, SR University, India"
 keywords:
   - dyscalculia
   - numerosity perception
