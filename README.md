@@ -26,7 +26,7 @@ The battery is designed for **field deployment in low-resource and multilingual 
 
 ## Quick start
 
-1. Download [`dyscalcbattery.html`](dyscalcbattery.html) (single file, ~50 KB).
+1. Download [`dyscalculia_battery.html`](dyscalculia_cbattery.html) (single file, ~50 KB).
 2. Open it in **Google Chrome** (recommended), Firefox, Safari, or Edge.
 3. On first load, allow ~10 seconds for the jsPsych library to cache from CDN.
 4. Fill in the participant info form.
