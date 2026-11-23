@@ -6,7 +6,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![jsPsych](https://img.shields.io/badge/built%20with-jsPsych%207.3.4-blueviolet.svg)](https://www.jspsych.org/)
 
-> *Maintained by the [Rakesh Sengupta]([https://krea.edu.in](https://krea.edu.in/sias/dr-rakesh-sengupta/)), School of Interwoven Arts and Sciences, Krea University, Sri City, Andhra Pradesh, India.*
+> Maintained by [Rakesh Sengupta](https://krea.edu.in/sias/dr-rakesh-sengupta/), Computational Cognition Laboratory, School of Interwoven Arts and Sciences, Krea University, Sri City, Andhra Pradesh, India.
 
 ---
 
@@ -18,68 +18,94 @@ DyscalcBattery is a single-file, browser-based battery of seven psychophysical t
 - **Measuring** the cognitive substrates of numerosity perception (Weber fractions, subitizing slopes, distance effects)
 - **Comparing** numerical and non-numerical quantity processing across formats (digits, dots, objects, shapes, colours)
 
-It runs entirely in a web browser, requires no installation, works offline after first load, and exports trial-level data as CSV for downstream analysis.
+It runs in a web browser, needs no installation and **no internet connection** (jsPsych is bundled inside the file), saves every trial to the laptop as it goes, and exports one CSV row per trial.
 
-The battery is designed for **field deployment in low-resource and multilingual settings** — schools without reliable internet, laptops without admin privileges, researchers without licensing budgets.
+It is designed for **field deployment by data collectors who are not programmers**, in schools without reliable internet or power.
 
 ---
 
-## Quick start
+## Quick start (data collectors)
 
-1. Download [`dyscalculia_battery.html`](dyscalculia_battery.html) (single file, ~50 KB).
-2. Open it in **Google Chrome** (recommended), Firefox, Safari, or Edge.
-3. On first load, allow ~10 seconds for the jsPsych library to cache from CDN.
-4. Fill in the participant info form.
-5. Pick a task or task-set from the menu.
-6. Run the session.
-7. The data CSV downloads automatically when the session ends.
+1. Copy [`dyscalculia_battery.html`](dyscalculia_battery.html) to the laptop (USB or download). One file, about 620 KB.
+2. Double-click it. It opens in **Google Chrome** (recommended).
+3. Check the green ticks under *Check this laptop*.
+4. Type your initials, the school code, the child's number, class, age and sex. Tick the two consent boxes.
+5. Press **Visit 1 — Screening** or **Visit 2 — Which side has more?**
+6. Read the blue "Say to the child" box aloud at the start of each task.
+7. At the end the CSV downloads automatically. Copy it to the USB drive and the shared folder the same day.
 
-That's it. No installation, no command line, no server.
+**Emergency stop:** hold **Shift** and press **Q**. Data is saved after every trial, so a crash, a closed tab or a flat battery never loses the trials already done: reopen the file and download the session from *Saved sessions on this laptop*.
+
+See [`docs/field_guide.md`](docs/field_guide.md) for the one-page field guide.
 
 ---
 
 ## The seven tasks
 
-| # | Task | Type | Duration | Key measures |
+| # | Task (label on screen) | Session | Duration | Key measures |
 |---|------|------|----------|--------------|
-| 1 | Simple Reaction Time | Control | ~3 min | Median RT (motor/processing baseline) |
-| 2 | Dot Enumeration | Screening | ~10 min | Subitizing slope, counting slope, accuracy at each set size |
-| 3 | Number Comparison (digits) | Screening | ~6 min | Distance-effect slope, mean RT, accuracy |
-| 4 | Dot Numerosity Comparison | Deep battery | ~6 min | Weber fraction *w* |
-| 5 | Object Numerosity Comparison | Deep battery | ~6 min | Weber fraction *w* |
-| 6 | Shape Numerosity Comparison | Deep battery | ~6 min | Weber fraction *w* |
-| 7 | Colour-Diversity Comparison | Non-numerical control | ~6 min | Weber fraction *w* (categorical) |
+| 1 | Simple reaction time ("Catch the dot") | Visit 1 | ~3 min | Median RT; anticipations |
+| 2 | Dot enumeration ("How many dots") | Visit 1 | ~8 min | Subitizing slope (1–3), counting slope (5–9), accuracy |
+| 3 | Number comparison, digits 1–9 ("Bigger number") | Visit 1 | ~5 min | Distance-effect slope, RT, accuracy |
+| 4 | Dot numerosity comparison ("More dots") | Visit 2 | ~6 min | Weber fraction *w* |
+| 5 | Object numerosity comparison ("More things") | Visit 2 | ~6 min | Weber fraction *w* |
+| 6 | Shape numerosity comparison ("More shapes") | Visit 2 | ~6 min | Weber fraction *w* |
+| 7 | Colour-diversity comparison ("More colours") | Visit 2 | ~6 min | Weber fraction *w* (categorical control) |
 
-Tasks 1–3 form the **screening protocol**, modelled after Butterworth-style paradigms. Tasks 4–7 form the **deep psychophysical battery**, with non-symbolic numerosity comparison across three formats plus a non-numerical colour-diversity control.
+**Visit 2 order** is counterbalanced automatically from the participant number (1→A, 2→B, 3→C, 4→D, 5→A, …):
 
-You can run the full battery (~45 min), the screening only (~20 min), the deep battery only (~25 min), or any single task.
+| Group | Order |
+|---|---|
+| A | Dots → Things → Shapes → Colours |
+| B | Shapes → Colours → Dots → Things |
+| C | Colours → Dots → Shapes → Things |
+| D | Things → Shapes → Colours → Dots |
+
+**Design details.** Tasks 4–6: reference 16 items vs. probe at nominal ratios 1.2, 1.4, 1.6, 1.8, 2.0 (20 trials per ratio, 100 main + 8 practice). Arrays show for 600 ms, then a 200 ms mask; the child may answer from array onset. Half the trials keep item size constant and half keep total area constant (column `size_control`), so neither item size nor cumulative area alone predicts the answer. Task 7: 12 circles per side, 3 v 5, 3 v 6, 4 v 6, 4 v 7, 5 v 8 distinct colours (100 main + 6 practice). Practice for tasks 1, 3–7 gives feedback and repeats once if accuracy is below 75%. A trial with no answer after 8 s is skipped and coded `timed_out = 1`, `correct = NA`.
+
+**Dot enumeration timing.** By default the child presses SPACE as soon as they know how many dots there are, then says the number and the experimenter clicks it. To time from the experimenter's key press at voice onset instead (v1.0 behaviour), set `dotEnumTiming: 'experimenter'` in the `STUDY` block.
 
 ---
 
-## What you get
+## Output
 
-At the end of each session, one CSV file downloads automatically:
-
-```
-WRG_<participant_id>_<YYYY-MM-DD>.csv
-```
-
-Each row is one trial. Columns include:
+One CSV per session, named `<ID>_<session>_<YYYYMMDD-HHMM>.csv` (e.g. `WRG_023_visit1_20261124-1042.csv`; training-mode files start with `DEMO_`). **One row per trial**, practice and main. Missing values are `NA`.
 
 | Column | Description |
 |--------|-------------|
-| `participant_id` | The ID you entered at session start |
-| `school_code` | School identifier (free text) |
-| `class_grade`, `age`, `sex` | Demographics |
-| `session_date` | ISO date |
-| `task` | Which task this trial belongs to |
-| `phase` | `practice` or `main` |
-| Task-specific columns | e.g., `set_size`, `left_n`, `right_n`, `ratio`, `distance` |
-| `response` | The key pressed |
-| `correct` | 1 / 0 |
-| `rt` | Reaction time, ms |
+| `participant_id`, `participant_num` | e.g. `WRG_023`, `23` |
+| `school_code`, `experimenter`, `class_grade`, `age`, `sex` | Entered on the setup screen |
+| `session_type`, `order_group`, `task_position` | `visit1` / `visit2` / `all` / `single_<task>`; counterbalance group; position of task in session |
+| `consent_on_file`, `assent_given` | 1 if ticked on the setup screen |
+| `task`, `phase`, `block_attempt`, `trial_num` | `srt`, `dotenum`, `numcomp`, `dotnum`, `objnum`, `shapenum`, `colour`; `practice`/`main`; practice round 1 or 2 |
+| `set_size`, `reported_number`, `timing_mode` | Dot enumeration |
+| `left_digit`, `right_digit`, `distance` | Number comparison |
+| `n_left`, `n_right`, `ratio_nominal`, `ratio_actual`, `size_control` | Tasks 4–6 (`ratio_actual` = larger/smaller as drawn) |
+| `colours_left`, `colours_right` | Task 7 |
+| `larger_side`, `response`, `response_side`, `correct`, `rt`, `timed_out` | Scoring. `rt` in ms from stimulus onset (Task 1: from dot onset) |
+| `isi_ms`, `anticipation` | Task 1 |
+| `answered_during_stimulus`, `items_drawn_ok`, `emoji_ok` | Quality checks |
+| `battery_version`, `session_start`, `screen_w`, `screen_h`, `pixel_ratio`, `browser` | Session and device |
 
-No identifying information is recorded — your master key file linking IDs to names should live elsewhere.
+No names are recorded. Keep the key linking participant numbers to names in a separate, password-protected file.
+
+---
+
+## Analysis
+
+[`analysis/fit_weber.R`](analysis/fit_weber.R) needs only base R (no packages):
+
+```r
+source("analysis/fit_weber.R")
+res <- summarise_battery("data/")      # folder of session CSVs; DEMO_ files are skipped
+write.csv(res, "participant_summary.csv", row.names = FALSE)
+```
+
+It returns one row per child: median simple RT, dot-enumeration accuracy and slopes, number-comparison accuracy, RT and distance slope, and a Weber fraction, accuracy and data-quality flag for each of tasks 4–7. The Weber fraction is the maximum-likelihood fit of
+
+P(correct) = Φ( (n₁ − n₂) / (w · √(n₁² + n₂²)) ),  n₁ > n₂
+
+(Halberda & Feigenson, 2008; Pica et al., 2004). The shorter form Φ((r − 1)/(w√2)) given in the v1.0 README is accurate only near r = 1 and should not be used.
 
 ---
 
@@ -87,13 +113,27 @@ No identifying information is recorded — your master key file linking IDs to n
 
 | | |
 |---|---|
-| **Browser** | Chrome ≥90, Firefox ≥88, Safari ≥14, Edge ≥90 |
-| **OS** | Anything — Windows, macOS, Linux, Android, iPadOS |
-| **Network** | Required on first run only (loads jsPsych from CDN); offline thereafter |
-| **Hardware** | Any laptop or tablet with a keyboard |
-| **Display** | Minimum 1024×768; recommended 1280×800 or larger |
+| **Browser** | Google Chrome or Edge (recommended), Firefox. Recent versions. |
+| **Internet** | Not needed |
+| **Hardware** | Laptop with keyboard; screen at least 1024 × 600 |
+| **Colour emoji** | Needed for Task 5; the setup screen checks this automatically |
 
-No installation, no admin rights, no package manager, no Python, no R required to *run* the battery. R (optional, ≥4.0) is needed only for the included post-hoc Weber-fraction fitting script.
+---
+
+## Customising
+
+Open `dyscalculia_battery.html` in a text editor. The two blocks to change are at the top of the battery script:
+
+- **`STUDY`**: study name, participant ID prefix (`WRG`), dot-enumeration timing, practice pass mark, response cap, counterbalance orders, trial counts.
+- **`TEXT`**: every sentence shown or read aloud. Translate this block for another language.
+
+Maintainers edit `src/app.js` and `src/shell.html`, then rebuild the single file:
+
+```
+npm install
+python3 build.py dyscalculia_battery.html
+python3 tests/smoke_test.py dyscalculia_battery.html all 0 demo out/   # headless check (needs Playwright + Chrome)
+```
 
 ---
 
@@ -101,119 +141,62 @@ No installation, no admin rights, no package manager, no Python, no R required t
 
 ```
 DyscalcBattery/
-├── dyscalcbattery.html      # The complete battery — single file
-├── README.md                # This file
-├── LICENSE                  # MIT License
-├── docs/
-│   ├── task_descriptions.md # Detailed protocol for each task
-│   ├── instructions/        # Telugu and English instruction scripts
-│   └── deployment.md        # Field deployment notes
-├── analysis/
-│   ├── fit_weber.R          # Maximum-likelihood Weber-fraction fitting
-│   ├── group_compare.R      # DD vs TD group comparisons
-│   └── example_data/        # Sample CSV outputs for testing
-└── CITATION.cff             # Machine-readable citation
+├── dyscalculia_battery.html   # the complete battery: give this one file to data collectors
+├── src/app.js                 # battery source (settings, text, tasks, setup screen)
+├── src/shell.html             # page layout and styles
+├── build.py, package.json     # bundle jsPsych + source into the single HTML file
+├── analysis/fit_weber.R       # per-participant summary and Weber-fraction fitting (base R)
+├── tests/smoke_test.py        # headless end-to-end run with simulated key presses
+├── docs/field_guide.md        # one-page guide for data collectors
+├── CHANGELOG.md
+├── CITATION.cff
+└── LICENSE                    # MIT
 ```
-
----
-
-## Usage examples
-
-### Run the full screening battery
-
-```
-1. Open dyscalcbattery.html in Chrome
-2. Fill in participant info (ID, class, age, sex)
-3. Click "Full SCREENING (Tasks 1–3)"
-4. Read each task's instruction screen aloud
-5. ~20 minutes later: CSV downloads
-```
-
-### Fit Weber fractions from the deep battery
-
-```r
-source("analysis/fit_weber.R")
-results <- fit_all_participants("data/")
-# returns a data frame: participant_id × task × w_hat
-```
-
-### Modify stimulus presentation duration
-
-The battery is one HTML file. Open it in any text editor, search for `trial_duration: 600`, change the value, save, reload in the browser. No build step.
-
----
-
-## Customisation
-
-The single-file architecture makes per-lab customisation trivial. Common modifications:
-
-- **Change response keys.** Search for `['f', 'j']` and replace with your preferred keys.
-- **Translate instructions.** Each task's instruction screen is a clearly-marked HTML string near the top of its `build...()` function. Replace the English text in-place.
-- **Adjust ratios.** Search `RATIOS = [1.2, 1.4, 1.6, 1.8, 2.0]` to change the numerosity-comparison ratios.
-- **Add a task.** Each task is a self-contained `build...()` function returning a jsPsych timeline. Copy any existing one as a template.
-
-If your modification is useful to others, please consider opening a pull request.
 
 ---
 
 ## Citation
 
-If you use this software in your research, please cite both:
+If you use this software, please cite:
 
-**The software:**
+> Sengupta, R., & Padmini, U. (2026). *DyscalcBattery* (Version 1.1.0) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.20195178
 
-> Sengupta, R., Padmini, U., et al. (2026). DyscalcBattery (Version 1.0.0) [Software]. Zenodo. [https://doi.org/10.5281/zenodo.20195178](https://doi.org/10.5281/zenodo.20195178)
-
-**The software paper:**
-
-> Sengupta, R., Padmini, U., et al. (2026). DyscalcBattery: An open browser-based psychophysical battery for dyscalculia screening and numerosity perception research. *SoftwareX*. [In press]
-
-A BibTeX-formatted citation is included in [`CITATION.cff`](CITATION.cff).
+A software paper describing the battery has been submitted to *SoftwareX*. `CITATION.cff` gives machine-readable citation metadata ("Cite this repository" on GitHub).
 
 ---
 
 ## License
 
-Released under the MIT License. You are free to use, modify, distribute, and integrate this software in your own work, including in commercial settings, provided the copyright notice and license are retained. See [`LICENSE`](LICENSE) for the full text.
+MIT License; see [`LICENSE`](LICENSE). jsPsych, bundled inside the HTML file, is © Josh de Leeuw and contributors, also under the MIT License.
 
 ---
 
 ## Background
 
-The battery operationalises seven psychophysical paradigms whose theoretical motivation is grounded in the lateral-inhibition recurrent-neural-network framework of numerosity perception developed in the Sengupta Lab:
+The battery operationalises paradigms motivated by the lateral-inhibition (on-centre off-surround) recurrent network account of numerosity perception:
 
 - Sengupta, R., Surampudi, B. R., & Melcher, D. (2014). A visual sense of number emerges from the dynamics of a recurrent on-center off-surround neural network. *Brain Research*, 1582, 114–124.
 - Sengupta, R., Bapiraju, S., & Melcher, D. (2017). Big and small numbers: Empirical support for a single, flexible mechanism for numerosity perception. *Attention, Perception, & Psychophysics*, 79(1), 253–266.
 - Verma, B. K., & Sengupta, R. (2023). Emergence of behavioral phenomena and adaptation effects in human numerosity decoder using recurrent neural networks. *Scientific Reports*, 13, 19571.
 
-The behavioural paradigms themselves are drawn from a long psychophysical tradition; see particularly Kaufman et al. (1949), Piazza et al. (2004), Butterworth (2003, 2011), and Halberda et al. (2008) — all listed in the SoftwareX paper.
-
----
-
-## Acknowledgements
-
-Built on [jsPsych](https://www.jspsych.org/) by Josh de Leeuw and contributors.
-
-Object icons (Task 5) are Unicode emoji rendered by the user's system font; no external asset files are required.
+Psychophysical background: Kaufman et al. (1949), Pica et al. (2004), Piazza et al. (2004), Halberda & Feigenson (2008), Halberda et al. (2008), Butterworth (2003, 2011).
 
 ---
 
 ## Contact
 
-**Maintainer:** Dr. Rakesh Sengupta
-**Email:** rakesh.sengupta@krea.edu.in
-**Institution:** School of Interwoven Arts and Sciences, Krea University, Sri City, Andhra Pradesh 517 646, India
+**Maintainer:** Dr. Rakesh Sengupta · rakesh.sengupta@krea.edu.in
+School of Interwoven Arts and Sciences, Krea University, Sri City, Andhra Pradesh 517 646, India
 
-For bug reports and feature requests, please open an [issue](https://github.com/rakesh-sengupta/DyscalcBattery/issues).
-
-For research collaboration enquiries, please contact the maintainer directly.
+Bug reports and feature requests: [GitHub issues](https://github.com/rakesh-sengupta/DyscalcBattery/issues).
 
 ---
 
 ## Roadmap
 
 - [x] v1.0.0 — Initial release: seven tasks, English instructions
-- [ ] v1.1.0 — Telugu instruction translations (in preparation)
-- [ ] v1.2.0 — Audio instructions (recorded in Telugu and English)
-- [ ] v1.3.0 — Optional touchscreen-friendly response interface for tablet use
+- [x] v1.1.0 — Offline bundle, autosave and recovery, automatic counterbalancing, simplified setup, one row per trial, analysis script (see `CHANGELOG.md`)
+- [ ] v1.2.0 — Telugu instructions (translate the `TEXT` block)
+- [ ] v1.3.0 — Recorded audio instructions in Telugu and English
+- [ ] v1.4.0 — Touchscreen responses for tablets; convex-hull control for numerosity arrays
 - [ ] v2.0.0 — Adaptive ratio selection (psi-method staircase) for faster Weber-fraction estimation

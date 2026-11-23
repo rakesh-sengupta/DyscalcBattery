@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DyscalcBattery</title>
+<style>
+  body { background:#f4f4f4; font-family: system-ui, "Segoe UI", Roboto, Arial, sans-serif; color:#111; margin:0; }
+  #setup, #done { max-width: 880px; margin: 0 auto; padding: 18px 22px 60px; }
+  h1 { color:#1F4E79; margin: 6px 0; } h2 { color:#1F4E79; }
+  .card { background:#fff; border:1px solid #d6d6d6; border-radius:10px; padding:16px 20px; margin:14px 0; }
+  .card h3 { margin:0 0 10px; color:#1F4E79; }
+  .row { display:flex; flex-wrap:wrap; gap:14px 22px; }
+  label { font-size:18px; }
+  input[type=text], input[type=number], select { font-size:18px; padding:6px 8px; margin-left:6px; border:1px solid #999; border-radius:6px; }
+  .check { display:block; font-size:18px; margin:8px 0; }
+  .check input { transform: scale(1.5); margin-right:10px; }
+  .bigbtn { display:block; width:100%; font-size:21px; padding:16px; margin:10px 0; border:0; border-radius:10px; background:#1F4E79; color:#fff; cursor:pointer; text-align:left; }
+  .bigbtn small { display:block; font-size:15px; opacity:.85; }
+  .bigbtn:hover { background:#2E75B6; }
+  .small-btn { font-size:14px; padding:4px 10px; cursor:pointer; }
+  .taskbtns button { font-size:15px; padding:8px 12px; margin:4px; cursor:pointer; }
+  #errors { color:#b71c1c; font-size:17px; font-weight:600; }
+  .warn { background:#fff3cd; border:1px solid #e0b84f; border-radius:6px; padding:8px 10px; margin:6px 0; }
+  .okline { color:#1b5e20; margin:3px 0; }
+  .small { font-size:14px; color:#555; }
+  table { border-collapse: collapse; width:100%; font-size:14px; } td, th { border-bottom:1px solid #ddd; padding:4px 6px; text-align:left; }
+  #idpreview { font-size:17px; margin-top:10px; }
+  #jspsych-target { display:none; height:100vh; }
+  .instr { text-align:left; max-width:820px; margin:0 auto; font-size:21px; line-height:1.45; }
+  .saylabel { font-weight:700; color:#555; margin-bottom:2px; }
+  .say { background:#eef5fb; border-left:5px solid #1F4E79; padding:10px 14px; font-size:23px; margin-top:0; }
+  .note { font-size:18px; color:#5d4037; }
+  .go { font-size:19px; margin-top:22px; }
+  .key { display:inline-block; min-width:34px; padding:2px 10px; border:2px solid #333; border-radius:7px; background:#fff; font-weight:700; text-align:center; }
+  .kleft { border-color:#1b5e20; color:#1b5e20; } .kright { border-color:#0d47a1; color:#0d47a1; }
+  .keyguide { font-size:24px; margin:22px 0 8px; text-align:center; }
+  .digits { font-size:200px; font-weight:700; display:flex; justify-content:center; gap:240px; line-height:1.1; }
+  .fix { font-size:80px; }
+  .fb { font-size:44px; font-weight:700; } .good { color:#1b5e20; } .bad { color:#e65100; }
+  .numbtn { font-size:30px !important; min-width:90px; margin:6px !important; }
+  #jspsych-canvas-stimulus { max-width: 96vw; height: auto; }
+  .ok { color:#1b5e20; } .warnh { color:#e65100; }
+  details summary { cursor:pointer; font-size:17px; color:#1F4E79; }
+</style>
+</head>
+<body>
+<div id="setup">
+  <h1>DyscalcBattery <span class="small">v<span id="version"></span></span></h1>
+  <div class="small" id="studyname"></div>
+
+  <div class="card"><h3>1. Check this laptop</h3><div id="devicecheck"></div></div>
+
+  <div class="card">
+    <h3>2. Fill in before every child</h3>
+    <div class="row">
+      <label>Your initials <input id="exp" type="text" size="5" maxlength="6"></label>
+      <label>School code <input id="school" type="text" size="14"></label>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <label>Participant number <input id="pnum" type="number" min="1" max="999" style="width:90px"></label>
+      <label>Class <select id="cls"><option value="">--</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option></select></label>
+      <label>Age <input id="age" type="number" min="6" max="16" style="width:70px"></label>
+      <label>Sex <select id="sex"><option value="">--</option><option value="F">Girl</option><option value="M">Boy</option><option value="O">Other</option></select></label>
+    </div>
+    <div id="idpreview"></div>
+    <label class="check"><input id="consent" type="checkbox"> Signed parent consent form is on file for this child</label>
+    <label class="check"><input id="assent" type="checkbox"> I read the assent script and the child said YES</label>
+    <div id="errors"></div>
+  </div>
+
+  <div class="card">
+    <h3>3. Choose the session</h3>
+    <button class="bigbtn" id="btn-v1">Visit 1 &mdash; Screening<small>Catch the dot &middot; How many dots &middot; Bigger number &nbsp;(about 20 minutes)</small></button>
+    <button class="bigbtn" id="btn-v2">Visit 2 &mdash; Which side has more?<small>Dots &middot; Things &middot; Shapes &middot; Colours, in this child's order (about 25 minutes)</small></button>
+    <details style="margin-top:10px">
+      <summary>Advanced (supervisor only)</summary>
+      <p class="small">Run everything in one sitting, or a single task for a make-up session.</p>
+      <button class="bigbtn" id="btn-all" style="background:#455a64">All 7 tasks in one sitting<small>About 45 minutes &mdash; only for older children</small></button>
+      <div class="taskbtns">
+        <button data-task="srt">Catch the dot</button><button data-task="dotenum">How many dots</button>
+        <button data-task="numcomp">Bigger number</button><button data-task="dotnum">More dots</button>
+        <button data-task="objnum">More things</button><button data-task="shapenum">More shapes</button>
+        <button data-task="colour">More colours</button>
+      </div>
+      <p><label>Deep-battery order <select id="ordersel"></select></label></p>
+      <label class="check"><input id="demo" type="checkbox"> Training mode (short tasks, for practising &mdash; never with study children)</label>
+    </details>
+  </div>
+
+  <div class="card"><h3>Saved sessions on this laptop</h3><div id="history"></div></div>
+  <p class="small">Emergency stop during a session: hold <b>Shift</b> and press <b>Q</b>. Data is saved after every trial, so nothing is lost if the laptop switches off.</p>
+</div>
+
+<div id="jspsych-target"></div>
+
+<div id="done" style="display:none">
+  <div class="card"><div id="donemsg"></div>
+    <button class="bigbtn" id="again" style="background:#2e7d32">Download again</button>
+    <button class="bigbtn" onclick="location.reload()">Start the next child</button>
+  </div>
+</div>
+
+<!-- ===== Battery code: study settings and all on-screen text are at the top of this script ===== -->
+<script>/*@@APP_JS@@*/</script>
+<!-- ===== jsPsych 7.3.4 (MIT License, (c) Josh de Leeuw and contributors), bundled so the battery
+     works with no internet connection. Do not edit below this line. ===== -->
+<style>/*@@JSPSYCH_CSS@@*/</style>
+<script>/*@@JSPSYCH_JS@@*/</script>
+</body>
+</html>
